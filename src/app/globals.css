@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* Mode tokens: dark is the default (spec §4.5). */
+:root {
+  color-scheme: dark;
+  --canvas: #0b0d12;
+  --surface: #151922;
+  --line: #262c38;
+  --fg: #e6e8ee;
+  --muted: #8b93a7;
+}
+
+[data-mode="light"] {
+  color-scheme: light;
+  --canvas: #f7f8fa;
+  --surface: #ffffff;
+  --line: #e2e5eb;
+  --fg: #151922;
+  --muted: #5f677a;
+}
+
+/* Accent presets. --accent-contrast keeps button text readable on light accents. */
+[data-accent="indigo"] { --accent-primary: #6366f1; --accent-hover: #4f46e5; --accent-contrast: #ffffff; }
+[data-accent="emerald"] { --accent-primary: #10b981; --accent-hover: #059669; --accent-contrast: #0b0d12; }
+[data-accent="amber"] { --accent-primary: #f59e0b; --accent-hover: #d97706; --accent-contrast: #0b0d12; }
+[data-accent="rose"] { --accent-primary: #f43f5e; --accent-hover: #e11d48; --accent-contrast: #ffffff; }
+[data-accent="cyan"] { --accent-primary: #06b6d4; --accent-hover: #0891b2; --accent-contrast: #0b0d12; }
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent-primary);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--accent-contrast);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
