@@ -1,5 +1,6 @@
 import { DEFAULT_THEME, isThemeConfig, THEME_STORAGE_KEY, type ThemeConfig } from '@/domain/theme';
 import { DEFAULT_VIEW, isViewMode, VIEW_STORAGE_KEY, type ViewMode } from '@/domain/view';
+import { DEFAULT_WEEKS, isWeekContext, WEEKS_STORAGE_KEY, type WeekContext } from '@/domain/week';
 
 function read<T>(key: string, isValid: (value: unknown) => value is T, fallback: T): T {
   const raw = localStorage.getItem(key);
@@ -26,3 +27,5 @@ export const loadTheme = (): ThemeConfig => read(THEME_STORAGE_KEY, isThemeConfi
 export const saveTheme = (theme: ThemeConfig): void => write(THEME_STORAGE_KEY, theme);
 export const loadViewMode = (): ViewMode => read(VIEW_STORAGE_KEY, isViewMode, DEFAULT_VIEW);
 export const saveViewMode = (view: ViewMode): void => write(VIEW_STORAGE_KEY, view);
+export const loadWeeks = (): WeekContext => read(WEEKS_STORAGE_KEY, isWeekContext, DEFAULT_WEEKS);
+export const saveWeeks = (weeks: WeekContext): void => write(WEEKS_STORAGE_KEY, weeks);

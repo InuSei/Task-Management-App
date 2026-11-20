@@ -1,10 +1,10 @@
-import { CalendarDays, Columns3, List } from 'lucide-react';
+import { CalendarDays, LayoutDashboard, List } from 'lucide-react';
 import type { ViewMode } from '@/domain/view';
 import { SegmentedControl, type SegmentOption } from '@/components/ui/SegmentedControl';
 
 const OPTIONS: readonly SegmentOption<ViewMode>[] = [
   { value: 'list', label: 'List', Icon: List },
-  { value: 'board', label: 'Board', Icon: Columns3 },
+  { value: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { value: 'timeline', label: 'Timeline', Icon: CalendarDays },
 ];
 
