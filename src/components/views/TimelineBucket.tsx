@@ -6,14 +6,14 @@ export type BucketTone = 'neutral' | 'warning' | 'danger';
 
 const BORDER: Record<BucketTone, string> = {
   neutral: 'border-line',
-  warning: 'border-amber-500',
-  danger: 'border-red-500',
+  warning: 'border-warning',
+  danger: 'border-danger',
 };
 
 const HEADING: Record<BucketTone, string> = {
   neutral: '',
-  warning: 'text-amber-500',
-  danger: 'text-red-500',
+  warning: 'text-warning',
+  danger: 'text-danger',
 };
 
 interface TimelineBucketProps {
@@ -55,7 +55,7 @@ export function TimelineBucket({
                 }`}
               >
                 <span className="block truncate">{task.title}</span>
-                {showDueDate && due && <span className="text-red-500">Due {formatDateKey(due)}</span>}
+                {showDueDate && due && <span className="text-danger">Due {formatDateKey(due)}</span>}
               </button>
             </li>
           );

@@ -1,20 +1,21 @@
+import type { Personnel } from '@/domain/personnel';
 import type { Task, TaskPatch } from '@/domain/task';
 import type { ViewMode } from '@/domain/view';
-import { KanbanBoard } from './KanbanBoard';
 import { ListView } from './ListView';
 import { TimelineMonitor } from './TimelineMonitor';
 
 interface WorkspaceViewProps {
-  view: ViewMode;
+  view: Exclude<ViewMode, 'dashboard'>;
   totalCount: number;
   tasks: readonly Task[];
+  people: readonly Personnel[];
   onUpdate: (id: string, patch: TaskPatch) => void;
   onOpen: (id: string) => void;
   onResetFilters: () => void;
 }
 
 /** Distinguishes an empty workspace from an over-filtered one (spec §5), then renders the active view. */
-export function WorkspaceView({ view, totalCount, tasks, onUpdate, onOpen, onResetFilters }: WorkspaceViewProps) {
+export function WorkspaceView({ view, totalCount, tasks, people, onUpdate, onOpen, onResetFilters }: WorkspaceViewProps) {
   if (totalCount === 0) {
     return (
       <p className="py-16 text-center text-muted">
@@ -40,9 +41,7 @@ export function WorkspaceView({ view, totalCount, tasks, onUpdate, onOpen, onRes
 
   switch (view) {
     case 'list':
-      return <ListView tasks={tasks} onUpdate={onUpdate} onOpen={onOpen} />;
-    case 'board':
-      return <KanbanBoard tasks={tasks} onUpdate={onUpdate} onOpen={onOpen} />;
+      return <ListView tasks={tasks} people={people} onUpdate={onUpdate} onOpen={onOpen} />;
     case 'timeline':
       return <TimelineMonitor tasks={tasks} onOpen={onOpen} />;
   }

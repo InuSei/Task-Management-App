@@ -10,24 +10,39 @@ import {
   type NewTaskInput,
   type TaskPriority,
 } from '@/domain/task';
+import type { Personnel } from '@/domain/personnel';
+import type { WeekContext } from '@/domain/week';
 import { Select } from '@/components/ui/Select';
+import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
+import { WeekSelect } from '@/components/personnel/WeekSelect';
 
 const controlClass = 'rounded-md border border-line bg-canvas px-2 py-1.5 text-sm';
 
-export function QuickAddBar({ onAdd }: { onAdd: (input: NewTaskInput) => void }) {
+interface QuickAddBarProps {
+  people: readonly Personnel[];
+  weeks: WeekContext;
+  onAdd: (input: NewTaskInput) => void;
+}
+
+export function QuickAddBar({ people, weeks, onAdd }: QuickAddBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [dueDate, setDueDate] = useState('');
+  const [assigneeId, setAssigneeId] = useState<string | null>(null);
+  const [pickedWeek, setPickedWeek] = useState<string | null>(null);
+  // Follows the active week until the user picks one; falls back if that week is renamed away.
+  const weekLabel = pickedWeek && weeks.availableWeeks.includes(pickedWeek) ? pickedWeek : weeks.activeWeekLabel;
   const length = title.trim().length;
   const tooLong = length > TITLE_MAX_LENGTH;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!isValidTitle(title)) return;
-    onAdd({ title, priority, dueDate: dueDate || null });
+    const assignee = people.some((p) => p.id === assigneeId) ? assigneeId : null;
+    onAdd({ title, priority, dueDate: dueDate || null, assigneeId: assignee, weekLabel });
     setTitle('');
-    setDueDate(''); // priority stays sticky for rapid entry; deadline resets
+    setDueDate(''); // priority, assignee and week stay sticky for rapid allocation; deadline resets
     inputRef.current?.focus();
   }
 
@@ -49,10 +64,10 @@ export function QuickAddBar({ onAdd }: { onAdd: (input: NewTaskInput) => void })
         aria-label="Task title"
         aria-invalid={tooLong}
         autoFocus
-        className={`min-w-48 flex-1 ${controlClass} ${tooLong ? 'border-red-500' : ''}`}
+        className={`min-w-48 flex-1 ${controlClass} ${tooLong ? 'border-danger' : ''}`}
       />
       {tooLong && (
-        <span role="status" className="text-xs text-red-500">
+        <span role="status" className="text-xs text-danger">
           {length}/{TITLE_MAX_LENGTH}
         </span>
       )}
@@ -71,6 +86,8 @@ export function QuickAddBar({ onAdd }: { onAdd: (input: NewTaskInput) => void })
         onChange={(e) => setDueDate(e.target.value)}
         className={controlClass}
       />
+      <AssigneeSelect people={people} value={assigneeId} onChange={setAssigneeId} className={controlClass} />
+      <WeekSelect weeks={weeks.availableWeeks} value={weekLabel} onChange={setPickedWeek} className={controlClass} />
       <button
         type="submit"
         disabled={!isValidTitle(title)}

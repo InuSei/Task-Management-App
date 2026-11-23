@@ -4,9 +4,9 @@ export type BadgeTone = 'neutral' | 'accent' | 'warning' | 'danger';
 
 const TONES: Record<BadgeTone, string> = {
   neutral: 'bg-line text-muted',
-  accent: 'bg-accent/15 text-accent',
-  warning: 'bg-amber-500/15 text-amber-500',
-  danger: 'bg-red-500/15 text-red-500',
+  accent: 'bg-accent/12 text-accent',
+  warning: 'bg-warning/12 text-warning',
+  danger: 'bg-danger/12 text-danger',
 };
 
 export function Badge({ tone = 'neutral', children }: { tone?: BadgeTone; children: ReactNode }) {

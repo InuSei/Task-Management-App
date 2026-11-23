@@ -1,24 +1,30 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import type { Personnel } from '@/domain/personnel';
 import {
   isValidTitle, PRIORITY_LABELS, STATUS_LABELS, TASK_PRIORITIES, TASK_STATUSES, TITLE_MAX_LENGTH,
   type Task, type TaskPatch,
 } from '@/domain/task';
 import { dueDateKey } from '@/domain/taskGroups';
 import { Field, inputClass } from '@/components/ui/Field';
+import { PanelHeader } from '@/components/ui/PanelHeader';
 import { Select } from '@/components/ui/Select';
+import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
+import { WeekSelect } from '@/components/personnel/WeekSelect';
 
 interface TaskEditFormProps {
   task: Task;
+  people: readonly Personnel[];
+  weeks: readonly string[];
   onUpdate: (patch: TaskPatch) => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
 /** Text fields save on blur; selects and the date save on change. */
-export function TaskEditForm({ task, onUpdate, onDelete, onClose }: TaskEditFormProps) {
+export function TaskEditForm({ task, people, weeks, onUpdate, onDelete, onClose }: TaskEditFormProps) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? '');
   const tooLong = title.trim().length > TITLE_MAX_LENGTH;
@@ -43,12 +49,7 @@ export function TaskEditForm({ task, onUpdate, onDelete, onClose }: TaskEditForm
 
   return (
     <form onSubmit={handleSubmit} className="flex h-full flex-col gap-4 p-5">
-      <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Task details</h2>
-        <button type="button" onClick={onClose} aria-label="Close" className="rounded p-1 hover:bg-line">
-          <X className="size-5" aria-hidden />
-        </button>
-      </header>
+      <PanelHeader title="Task details" onClose={onClose} />
       <Field label={tooLong ? `Title (${title.trim().length}/${TITLE_MAX_LENGTH})` : 'Title'}>
         <textarea
           rows={2}
@@ -61,7 +62,7 @@ export function TaskEditForm({ task, onUpdate, onDelete, onClose }: TaskEditForm
             e.currentTarget.blur();
           }}
           aria-invalid={tooLong}
-          className={`${inputClass} resize-none break-words ${tooLong ? 'border-red-500' : ''}`}
+          className={`${inputClass} resize-none break-words ${tooLong ? 'border-danger' : ''}`}
         />
       </Field>
       <Field label="Description">
@@ -81,6 +82,14 @@ export function TaskEditForm({ task, onUpdate, onDelete, onClose }: TaskEditForm
           <Select value={task.priority} options={TASK_PRIORITIES} labels={PRIORITY_LABELS} onChange={(priority) => onUpdate({ priority })} />
         </Field>
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Assignee">
+          <AssigneeSelect people={people} value={task.assigneeId} onChange={(assigneeId) => onUpdate({ assigneeId })} />
+        </Field>
+        <Field label="Week">
+          <WeekSelect weeks={weeks} value={task.weekLabel ?? ''} onChange={(weekLabel) => onUpdate({ weekLabel })} />
+        </Field>
+      </div>
       <Field label="Deadline">
         <input
           type="date"
@@ -90,7 +99,7 @@ export function TaskEditForm({ task, onUpdate, onDelete, onClose }: TaskEditForm
         />
       </Field>
       <footer className="mt-auto flex justify-between">
-        <button type="button" onClick={handleDelete} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/10">
+        <button type="button" onClick={handleDelete} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-danger hover:bg-danger/10">
           <Trash2 className="size-4" aria-hidden /> Delete
         </button>
         <button type="submit" className="rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-on-accent hover:bg-accent-hover">

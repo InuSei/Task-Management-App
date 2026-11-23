@@ -139,3 +139,69 @@ src/
 3. **Slice 3 (Kanban & Filtering):** Add `KanbanBoard` with drag-and-drop status/order updates and the `FilterBar`.
 4. **Slice 4 (Timeline Monitor):** Build the `TimelineMonitor` component for visual deadline tracking across upcoming days.
 5. **Slice 5 (Optional MongoDB Adapter):** Implement `/api/tasks` + Mongoose/MongoDB driver and `MongoTaskRepository`.
+
+## 8. Feature Update v2: Personnel Task Allocation & Public Progress Dashboard
+
+### 8.1 Overview & Navigation Shift
+- Build directly on the existing Next.js + Tailwind + repository-pattern codebase.
+- **Route `/` (Task Allocation Workspace):** Becomes the main hub for creating/managing tasks and allocating them to personnel. Retains the persistent Quick-Add bar, theme customization, and clean repository abstraction.
+- **Dashboard View (Replaces Board View):** Replaces the Kanban Board view with a read-friendly **Personnel Task Dashboard** open/visible to all viewers without login friction, showing every person's assigned tasks, progress, and active Day/Week context.
+
+## 8. Feature Update v2: Personnel Task Allocation & Public Progress Dashboard
+
+### 8.1 Overview & Navigation Shift
+- Build directly on the existing Next.js + Tailwind + repository-pattern codebase.
+- **Route `/` (Task Allocation Workspace):** Becomes the main hub for creating/managing tasks and allocating them to personnel. Retains the persistent Quick-Add bar, theme customization, and clean repository abstraction.
+- **Dashboard View (Replaces Board View):** Replaces the Kanban Board view with a read-friendly **Personnel Task Dashboard** open/visible to all viewers without login friction, showing every person's assigned tasks, progress, and active Day/Week context.
+
+### 8.2 New & Updated Data Models
+
+#### `Personnel` Entity
+```ts
+export interface Personnel {
+  id: string;                 // UUID v4
+  name: string;               // Required, trimmed, 1–80 chars
+  department: string;         // Free-text department name (e.g., "IT", "Operations"), trimmed
+  createdAt: string;          // ISO 8601 timestamp
+}
+```
+
+#### `WeekContext` Entity
+```ts
+export interface WeekContext {
+  activeWeekLabel: string;    // e.g., "Week 1", "Week 2", or user-selected week
+  availableWeeks: string[];   // Customizable list of week labels
+}
+```
+
+#### `Task` Entity Extension
+- Add `assigneeId?: string | null;` (links a task to a `Personnel.id`; `null` or `undefined` means unassigned).
+- Add `weekLabel?: string;` (associates a task with a week label when allocated, defaulting to the current active week).
+
+### 8.3 Functional Requirements
+
+#### 8.3.1 Personnel Management (Add / Edit / Remove)
+- Accessible from the `/` Allocation workspace via a clean modal or drawer.
+- Add a person with **Name** and **Department** (free-text input with suggestions from existing departments).
+- Persist via a dedicated `PersonnelRepository` (`LocalStoragePersonnelRepository` in Phase 1, extendable to MongoDB later) following the exact same separation-of-concerns rule as `TaskRepository`.
+
+#### 8.3.2 Task Allocation on `/`
+- Quick-Add bar and task rows/drawers on `/` allow assigning or reassigning a task to any `Personnel` member and setting its `weekLabel` alongside priority and deadline.
+- Unassigned tasks remain clearly visible on `/` so nothing gets lost before allocation.
+
+#### 8.3.3 Day & Customizable Week Header (Dashboard)
+- Displays the current **Day** (e.g., `Friday, Nov 20`) alongside a **Week selector/customizer** (pick an existing week, add/rename a week label like `Week 1` → `Week 2`, and filter or inspect tasks by week).
+
+#### 8.3.4 Personnel Card (Dashboard Grid)
+- Renders one card per person in a responsive grid (free/open view for anyone looking at the dashboard).
+- **Card Header:** Person's **Name** and **Department** badge/label.
+- **Card Body (Compact Preview):** Lists up to **3 assigned tasks** (showing task title, status/priority indicator, and due date). If a person has more than 3 tasks, show a compact `"+X more tasks"` indicator.
+- **Card Footer:** Shows **Progress (%)** calculated as `Math.round((completedCount / totalCount) * 100)` (displays `0%` when `totalCount === 0`), paired with a visual progress bar.
+- **Card Click / Expand:** Clicking a card opens a detail modal or slide-over showing **all** tasks assigned to that person, full task notes/deadlines, and quick status toggles.
+
+### 8.4 Edge Cases for v2
+- **0 Personnel Added:** Show a prompt on the Dashboard and `/` to add team members before allocating tasks.
+- **Person Has 0 Tasks:** Card still renders with Name, Department, empty task note, and `0%` progress.
+- **Deleting a Person:** Tasks previously assigned to them become unassigned (`assigneeId: null`) rather than being deleted.
+- **Division by Zero on Progress:** Safely return `0%` when a person has zero tasks.
+

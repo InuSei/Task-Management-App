@@ -1,9 +1,4 @@
 import type { Task } from '@/domain/task';
+import type { Repository } from './repository';
 
-/** Persistence contract. UI and hooks depend only on this, never on a storage backend. */
-export interface TaskRepository {
-  list(): Promise<Task[]>;
-  create(task: Task): Promise<void>;
-  update(task: Task): Promise<void>;
-  remove(id: string): Promise<void>;
-}
+export interface TaskRepository extends Repository<Task> {}

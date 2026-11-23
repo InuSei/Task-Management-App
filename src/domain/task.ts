@@ -12,16 +12,20 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  assigneeId?: string | null;
+  weekLabel?: string;
 }
 
 export interface NewTaskInput {
   title: string;
   priority: TaskPriority;
   dueDate: string | null;
+  assigneeId: string | null;
+  weekLabel: string;
 }
 
 export type TaskPatch = Partial<
-  Pick<Task, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'order'>
+  Pick<Task, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'order' | 'assigneeId' | 'weekLabel'>
 >;
 
 export const TITLE_MAX_LENGTH = 140;
@@ -59,6 +63,8 @@ export function createTask(input: NewTaskInput, order: number, now = new Date())
     priority: input.priority,
     dueDate: input.dueDate,
     order,
+    assigneeId: input.assigneeId,
+    weekLabel: input.weekLabel,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -89,6 +95,8 @@ export function isTask(value: unknown): value is Task {
     isOptionalString(v.dueDate) &&
     typeof v.order === 'number' &&
     typeof v.createdAt === 'string' &&
-    typeof v.updatedAt === 'string'
+    typeof v.updatedAt === 'string' &&
+    isOptionalString(v.assigneeId) &&
+    (v.weekLabel === undefined || typeof v.weekLabel === 'string')
   );
 }
