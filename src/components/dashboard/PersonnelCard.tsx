@@ -1,9 +1,10 @@
-import { ChevronRight, OctagonAlert } from 'lucide-react';
-import { progressPercent } from '@/domain/dashboard';
+import { ChevronRight, OctagonAlert, Users } from 'lucide-react';
+import { isCollaborator, progressPercent } from '@/domain/dashboard';
 import type { Personnel } from '@/domain/personnel';
 import { isBlocked, type Task } from '@/domain/task';
 import { dueDateKey, formatDateKey, isOverdue } from '@/domain/taskGroups';
-import { Badge } from '@/components/ui/Badge';
+import type { DepartmentColors } from '@/domain/roleColor';
+import { RoleBadge } from '@/components/personnel/RoleBadge';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { TaskStatusIcon } from './TaskStatusIcon';
 
@@ -13,12 +14,13 @@ interface PersonnelCardProps {
   person: Personnel;
   tasks: readonly Task[];
   today: string;
+  colors: DepartmentColors;
   onOpenPerson: () => void;
   onOpenTask: (id: string) => void;
 }
 
 /** Header and "+X more" open the person's full list; each task opens its own detail. */
-export function PersonnelCard({ person, tasks, today, onOpenPerson, onOpenTask }: PersonnelCardProps) {
+export function PersonnelCard({ person, tasks, today, colors, onOpenPerson, onOpenTask }: PersonnelCardProps) {
   const hidden = tasks.length - PREVIEW_LIMIT;
 
   return (
@@ -28,15 +30,13 @@ export function PersonnelCard({ person, tasks, today, onOpenPerson, onOpenTask }
         onClick={onOpenPerson}
         aria-haspopup="dialog"
         title="View all tasks"
-        className="group flex w-full items-center gap-2 text-left"
+        className="group flex w-full min-w-0 flex-col items-start gap-1.5 text-left"
       >
-        <h3 className="min-w-0 truncate font-semibold group-hover:text-accent">{person.name}</h3>
-        <ChevronRight className="size-4 shrink-0 text-muted group-hover:text-accent" aria-hidden />
-        {person.department && (
-          <span className="ml-auto">
-            <Badge tone="accent">{person.department}</Badge>
-          </span>
-        )}
+        <span className="flex w-full min-w-0 items-center gap-2">
+          <h3 className="min-w-0 truncate font-semibold group-hover:text-accent">{person.name}</h3>
+          <ChevronRight className="size-4 shrink-0 text-muted group-hover:text-accent" aria-hidden />
+        </span>
+        {person.department && <RoleBadge department={person.department} colors={colors} />}
       </button>
       {tasks.length === 0 ? (
         <p className="text-sm text-muted">No tasks this week</p>
@@ -58,6 +58,9 @@ Blocked: ${task.blocker}` : task.title}
                   <span className={`min-w-0 flex-1 truncate ${task.status === 'done' ? 'text-muted line-through' : ''}`}>
                     {task.title}
                   </span>
+                  {isCollaborator(task, person.id) && (
+                    <Users role="img" aria-label="Collaborating" className="size-3.5 shrink-0 text-muted" />
+                  )}
                   {isBlocked(task) && (
                     <OctagonAlert role="img" aria-label="Blocked" className="size-3.5 shrink-0 text-danger" />
                   )}

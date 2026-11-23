@@ -14,6 +14,7 @@ import { Select } from '@/components/ui/Select';
 import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
 import { WeekSelect } from '@/components/personnel/WeekSelect';
 import { BlockerField } from './BlockerField';
+import { CollaboratorPicker } from './CollaboratorPicker';
 
 interface TaskEditFormProps {
   task: Task;
@@ -92,6 +93,12 @@ export function TaskEditForm({ task, people, weeks, onUpdate, onDelete, onClose 
           <WeekSelect weeks={weeks} value={task.weekLabel ?? ''} onChange={(weekLabel) => onUpdate({ weekLabel })} />
         </Field>
       </div>
+      <CollaboratorPicker
+        people={people}
+        assigneeId={task.assigneeId}
+        value={task.collaboratorIds}
+        onChange={(collaboratorIds) => onUpdate({ collaboratorIds })}
+      />
       <Field label="Deadline">
         <input
           type="date"

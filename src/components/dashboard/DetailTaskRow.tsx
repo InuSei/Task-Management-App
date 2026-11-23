@@ -1,6 +1,7 @@
 import { OctagonAlert } from 'lucide-react';
 import { isBlocked, STATUS_LABELS, TASK_STATUSES, type Task, type TaskPatch } from '@/domain/task';
 import { dueDateKey, formatDateKey } from '@/domain/taskGroups';
+import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
 import { BlockedBadge, PriorityBadge, UrgencyBadge } from '@/components/tasks/TaskBadges';
 import { TaskStatusIcon } from './TaskStatusIcon';
@@ -8,11 +9,12 @@ import { TaskStatusIcon } from './TaskStatusIcon';
 interface DetailTaskRowProps {
   task: Task;
   today: string;
+  collaborating: boolean;
   onUpdate: (id: string, patch: TaskPatch) => void;
   onOpen: (id: string) => void;
 }
 
-export function DetailTaskRow({ task, today, onUpdate, onOpen }: DetailTaskRowProps) {
+export function DetailTaskRow({ task, today, collaborating, onUpdate, onOpen }: DetailTaskRowProps) {
   const due = dueDateKey(task.dueDate);
 
   return (
@@ -30,6 +32,7 @@ export function DetailTaskRow({ task, today, onUpdate, onOpen }: DetailTaskRowPr
         >
           {task.title}
         </button>
+        {collaborating && <Badge>Collaborator</Badge>}
         <BlockedBadge task={task} />
         <UrgencyBadge task={task} today={today} />
         <PriorityBadge task={task} />

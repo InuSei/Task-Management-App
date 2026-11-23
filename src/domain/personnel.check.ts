@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { applyPatch, createTask, isTask } from './task.ts';
 import { applyPersonnelPatch, createPersonnel, departmentsOf, isPersonnel, isValidName } from './personnel.ts';
 import { addWeek, DEFAULT_WEEKS, isWeekContext, renameWeek } from './week.ts';
-import { progressPercent, tasksForPerson } from './dashboard.ts';
+import { isCollaborator, progressPercent, tasksForPerson } from './dashboard.ts';
+import { DEFAULT_DEPARTMENT_COLORS, isDepartmentColors, roleColorOf, ROLE_COLORS, setRoleColor } from './roleColor.ts';
 
 // Personnel validation
 assert.equal(isValidName('  '), false);
@@ -57,5 +58,28 @@ assert.equal(renameWeek(two, 'Week 2', '  '), null); // empty
 assert.deepEqual(renameWeek(two, 'Week 2', 'Week 2'), two); // unchanged is fine
 assert.equal(isWeekContext(two), true);
 assert.equal(isWeekContext({ activeWeekLabel: 'Week 9', availableWeeks: ['Week 1'] }), false);
+
+// Collaborators: the task shows for them too, flagged as collaborating; the owner isn't a collaborator
+const shared = applyPatch(make('shared', null, ana.id), { collaboratorIds: [ben.id, ana.id] });
+assert.deepEqual(new Set(tasksForPerson([shared, other, t1], ben.id)), new Set([shared, other])); // own + collaborating
+assert.equal(isCollaborator(shared, ben.id), true);
+assert.equal(isCollaborator(shared, ana.id), false); // listed, but she owns it
+assert.equal(tasksForPerson([shared], ana.id).length, 1); // no duplicate for the owner
+assert.equal(tasksForPerson([shared], cy.id).length, 0);
+assert.equal(isTask({ ...shared, collaboratorIds: [1] }), false);
+assert.equal(isTask({ ...shared, collaboratorIds: 'x' }), false);
+
+// Role colours: stable default per name (case/space-insensitive), overridable, validated
+const auto = roleColorOf('IT', DEFAULT_DEPARTMENT_COLORS);
+assert.ok(ROLE_COLORS.includes(auto));
+assert.equal(roleColorOf(' it ', DEFAULT_DEPARTMENT_COLORS), auto);
+const picked = setRoleColor(DEFAULT_DEPARTMENT_COLORS, 'IT', 'teal');
+assert.equal(roleColorOf('it', picked), 'teal');
+const repicked = setRoleColor(picked, ' it', 'rose');
+assert.equal(repicked.colors.length, 1); // replaced, not duplicated
+assert.equal(roleColorOf('IT', repicked), 'rose');
+assert.equal(isDepartmentColors(repicked), true);
+assert.equal(isDepartmentColors({ colors: [{ department: 'IT', color: 'neon' }] }), false);
+assert.equal(isDepartmentColors({ colors: {} }), false);
 
 console.log('personnel checks passed');

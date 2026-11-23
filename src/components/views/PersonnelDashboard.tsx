@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { tasksForPerson } from '@/domain/dashboard';
 import type { Personnel } from '@/domain/personnel';
+import type { DepartmentColors } from '@/domain/roleColor';
 import type { Task, TaskPatch } from '@/domain/task';
 import { toDateKey } from '@/domain/taskGroups';
 import type { WeekContext } from '@/domain/week';
@@ -15,6 +16,7 @@ interface PersonnelDashboardProps {
   people: readonly Personnel[];
   tasks: readonly Task[];
   weeks: WeekContext;
+  departmentColors: DepartmentColors;
   onWeeksChange: (weeks: WeekContext) => void;
   onRenameWeek: (label: string) => boolean;
   onUpdate: (id: string, patch: TaskPatch) => void;
@@ -23,7 +25,7 @@ interface PersonnelDashboardProps {
 }
 
 /** Read-friendly per-person progress for the active week. */
-export function PersonnelDashboard({ people, tasks, weeks, onUpdate, onOpenTask, onManageTeam, ...header }: PersonnelDashboardProps) {
+export function PersonnelDashboard({ people, tasks, weeks, departmentColors, onUpdate, onOpenTask, onManageTeam, ...header }: PersonnelDashboardProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const today = toDateKey(new Date());
   const weekTasks = tasks.filter((t) => t.weekLabel === weeks.activeWeekLabel);
@@ -42,6 +44,7 @@ export function PersonnelDashboard({ people, tasks, weeks, onUpdate, onOpenTask,
               person={person}
               tasks={tasksForPerson(weekTasks, person.id)}
               today={today}
+              colors={departmentColors}
               onOpenPerson={() => setOpenId(person.id)}
               onOpenTask={onOpenTask}
             />
@@ -52,6 +55,7 @@ export function PersonnelDashboard({ people, tasks, weeks, onUpdate, onOpenTask,
         person={open}
         tasks={open ? tasksForPerson(weekTasks, open.id) : []}
         today={today}
+        colors={departmentColors}
         onUpdate={onUpdate}
         onOpenTask={onOpenTask}
         onClose={() => setOpenId(null)}

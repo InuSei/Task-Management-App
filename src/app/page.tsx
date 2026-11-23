@@ -46,6 +46,7 @@ export default function WorkspacePage() {
               people={ws.people}
               tasks={visible}
               weeks={ws.weeks}
+              departmentColors={ws.departmentColors}
               onWeeksChange={ws.setWeeks}
               onRenameWeek={ws.renameActiveWeek}
               onUpdate={ws.updateTask}
@@ -79,6 +80,8 @@ export default function WorkspacePage() {
       <TeamDialog
         open={teamOpen}
         people={ws.people}
+        colors={ws.departmentColors}
+        onColorsChange={ws.setDepartmentColors}
         onClose={() => setTeamOpen(false)}
         onAdd={ws.addPerson}
         onUpdate={ws.updatePerson}

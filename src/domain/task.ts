@@ -15,6 +15,8 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   assigneeId?: string | null;
+  /** People who share the task with the assignee; it shows on their dashboard too. */
+  collaboratorIds?: string[];
   weekLabel?: string;
 }
 
@@ -27,7 +29,7 @@ export interface NewTaskInput {
 }
 
 export type TaskPatch = Partial<
-  Pick<Task, 'title' | 'description' | 'blocker' | 'status' | 'priority' | 'dueDate' | 'order' | 'assigneeId' | 'weekLabel'>
+  Pick<Task, 'title' | 'description' | 'blocker' | 'status' | 'priority' | 'dueDate' | 'order' | 'assigneeId' | 'collaboratorIds' | 'weekLabel'>
 >;
 
 export const TITLE_MAX_LENGTH = 140;
@@ -100,6 +102,8 @@ export function isTask(value: unknown): value is Task {
     typeof v.createdAt === 'string' &&
     typeof v.updatedAt === 'string' &&
     isOptionalString(v.assigneeId) &&
+    (v.collaboratorIds === undefined ||
+      (Array.isArray(v.collaboratorIds) && v.collaboratorIds.every((id: unknown) => typeof id === 'string'))) &&
     (v.weekLabel === undefined || typeof v.weekLabel === 'string')
   );
 }

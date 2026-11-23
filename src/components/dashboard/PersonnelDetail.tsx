@@ -1,7 +1,9 @@
 'use client';
 
-import { progressPercent } from '@/domain/dashboard';
+import { isCollaborator, progressPercent } from '@/domain/dashboard';
 import type { Personnel } from '@/domain/personnel';
+import type { DepartmentColors } from '@/domain/roleColor';
+import { RoleBadge } from '@/components/personnel/RoleBadge';
 import type { Task, TaskPatch } from '@/domain/task';
 import { PanelHeader } from '@/components/ui/PanelHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -12,27 +14,39 @@ interface PersonnelDetailProps {
   person: Personnel | null;
   tasks: readonly Task[];
   today: string;
+  colors: DepartmentColors;
   onUpdate: (id: string, patch: TaskPatch) => void;
   onOpenTask: (id: string) => void;
   onClose: () => void;
 }
 
 /** Every task assigned to one person for the active week, with quick status changes. */
-export function PersonnelDetail({ person, tasks, today, onUpdate, onOpenTask, onClose }: PersonnelDetailProps) {
+export function PersonnelDetail({ person, tasks, today, colors, onUpdate, onOpenTask, onClose }: PersonnelDetailProps) {
   return (
     <SlideOver open={person !== null} label={`${person?.name ?? 'Personnel'} tasks`} onClose={onClose}>
       {(close) =>
         person && (
           <div className="flex h-full flex-col gap-4 overflow-y-auto p-5">
             <PanelHeader title={person.name} onClose={close} />
-            {person.department && <p className="-mt-3 text-sm text-muted">{person.department}</p>}
+            {person.department && (
+              <div className="-mt-2">
+                <RoleBadge department={person.department} colors={colors} />
+              </div>
+            )}
             <ProgressBar value={progressPercent(tasks)} label={`${person.name} progress`} />
             {tasks.length === 0 ? (
               <p className="text-sm text-muted">No tasks assigned this week.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {tasks.map((task) => (
-                  <DetailTaskRow key={task.id} task={task} today={today} onUpdate={onUpdate} onOpen={onOpenTask} />
+                  <DetailTaskRow
+                    key={task.id}
+                    task={task}
+                    today={today}
+                    collaborating={isCollaborator(task, person.id)}
+                    onUpdate={onUpdate}
+                    onOpen={onOpenTask}
+                  />
                 ))}
               </ul>
             )}
