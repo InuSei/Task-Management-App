@@ -13,6 +13,7 @@ import { PanelHeader } from '@/components/ui/PanelHeader';
 import { Select } from '@/components/ui/Select';
 import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
 import { WeekSelect } from '@/components/personnel/WeekSelect';
+import { BlockerField } from './BlockerField';
 
 interface TaskEditFormProps {
   task: Task;
@@ -48,7 +49,7 @@ export function TaskEditForm({ task, people, weeks, onUpdate, onDelete, onClose 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex h-full flex-col gap-4 p-5">
+    <form onSubmit={handleSubmit} className="flex h-full flex-col gap-4 overflow-y-auto p-5">
       <PanelHeader title="Task details" onClose={onClose} />
       <Field label={tooLong ? `Title (${title.trim().length}/${TITLE_MAX_LENGTH})` : 'Title'}>
         <textarea
@@ -67,13 +68,14 @@ export function TaskEditForm({ task, people, weeks, onUpdate, onDelete, onClose 
       </Field>
       <Field label="Description">
         <textarea
-          rows={6}
+          rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           onBlur={commitDescription}
           className={`${inputClass} resize-y`}
         />
       </Field>
+      <BlockerField blocker={task.blocker} onSave={(blocker) => onUpdate({ blocker })} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Status">
           <Select value={task.status} options={TASK_STATUSES} labels={STATUS_LABELS} onChange={(status) => onUpdate({ status })} />

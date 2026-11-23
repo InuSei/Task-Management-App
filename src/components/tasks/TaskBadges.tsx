@@ -1,4 +1,4 @@
-import { PRIORITY_LABELS, type Task } from '@/domain/task';
+import { isBlocked, PRIORITY_LABELS, type Task } from '@/domain/task';
 import { getUrgency } from '@/domain/taskGroups';
 import { Badge } from '@/components/ui/Badge';
 
@@ -7,6 +7,10 @@ export function UrgencyBadge({ task, today }: { task: Task; today: string }) {
   if (urgency === 'overdue') return <Badge tone="danger">Overdue</Badge>;
   if (urgency === 'today') return <Badge tone="warning">Today</Badge>;
   return null;
+}
+
+export function BlockedBadge({ task }: { task: Task }) {
+  return isBlocked(task) ? <Badge tone="danger">Blocked</Badge> : null;
 }
 
 export function PriorityBadge({ task }: { task: Task }) {

@@ -6,6 +6,8 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
+  /** Why the task isn't finished and what caused it; empty or missing means not blocked. */
+  blocker?: string;
   status: TaskStatus;
   priority: TaskPriority;
   dueDate?: string | null;
@@ -25,7 +27,7 @@ export interface NewTaskInput {
 }
 
 export type TaskPatch = Partial<
-  Pick<Task, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'order' | 'assigneeId' | 'weekLabel'>
+  Pick<Task, 'title' | 'description' | 'blocker' | 'status' | 'priority' | 'dueDate' | 'order' | 'assigneeId' | 'weekLabel'>
 >;
 
 export const TITLE_MAX_LENGTH = 140;
@@ -90,6 +92,7 @@ export function isTask(value: unknown): value is Task {
     typeof v.id === 'string' &&
     typeof v.title === 'string' &&
     isOptionalString(v.description) &&
+    isOptionalString(v.blocker) &&
     (TASK_STATUSES as readonly unknown[]).includes(v.status) &&
     (TASK_PRIORITIES as readonly unknown[]).includes(v.priority) &&
     isOptionalString(v.dueDate) &&
@@ -99,4 +102,9 @@ export function isTask(value: unknown): value is Task {
     isOptionalString(v.assigneeId) &&
     (v.weekLabel === undefined || typeof v.weekLabel === 'string')
   );
+}
+
+/** A blocker only counts while the task is still open; finishing the task resolves it. */
+export function isBlocked(task: Task): boolean {
+  return Boolean(task.blocker?.trim()) && task.status !== 'done';
 }

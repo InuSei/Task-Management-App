@@ -2,7 +2,7 @@ import type { Personnel } from '@/domain/personnel';
 import type { Task } from '@/domain/task';
 import { dueDateKey, formatDateKey } from '@/domain/taskGroups';
 import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
-import { PriorityBadge, UrgencyBadge } from './TaskBadges';
+import { BlockedBadge, PriorityBadge, UrgencyBadge } from './TaskBadges';
 
 interface TaskListItemProps {
   task: Task;
@@ -33,6 +33,7 @@ export function TaskListItem({ task, today, people, onAssign, onToggleDone, onOp
       >
         {task.title}
       </button>
+      <BlockedBadge task={task} />
       <UrgencyBadge task={task} today={today} />
       {due && <span className="shrink-0 text-xs text-muted">{formatDateKey(due)}</span>}
       <PriorityBadge task={task} />

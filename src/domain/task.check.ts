@@ -1,6 +1,6 @@
 // Self-check for domain logic. Run: npm run check
 import assert from 'node:assert/strict';
-import { applyPatch, createTask, isTask, isValidTitle } from './task.ts';
+import { applyPatch, createTask, isBlocked, isTask, isValidTitle } from './task.ts';
 import { addDays, dueDateKey, getUrgency, groupTasks } from './taskGroups.ts';
 import { buildTimeline } from './timeline.ts';
 import { filterTasks } from './taskFilters.ts';
@@ -43,6 +43,14 @@ assert.equal(dueDateKey(new Date(2026, 10, 19, 23, 30).toISOString()), '2026-11-
 assert.equal(isTask(overdue), true);
 assert.equal(isTask({ ...overdue, status: 'bogus' }), false);
 assert.equal(isTask(null), false);
+assert.equal(isTask({ ...overdue, blocker: 'Waiting on vendor' }), true);
+assert.equal(isTask({ ...overdue, blocker: 42 }), false);
+
+// Blockers: only open tasks with real text count as blocked
+assert.equal(isBlocked(overdue), false);
+assert.equal(isBlocked(applyPatch(overdue, { blocker: '  ' })), false);
+assert.equal(isBlocked(applyPatch(overdue, { blocker: 'Waiting on vendor' })), true);
+assert.equal(isBlocked(applyPatch(overdue, { blocker: 'Waiting on vendor', status: 'done' })), false);
 
 // Filters
 const high = applyPatch(make('Ship release', null), { priority: 'high', description: 'notes about QA' });

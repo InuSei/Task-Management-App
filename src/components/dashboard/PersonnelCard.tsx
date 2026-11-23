@@ -1,7 +1,7 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, OctagonAlert } from 'lucide-react';
 import { progressPercent } from '@/domain/dashboard';
 import type { Personnel } from '@/domain/personnel';
-import type { Task } from '@/domain/task';
+import { isBlocked, type Task } from '@/domain/task';
 import { dueDateKey, formatDateKey, isOverdue } from '@/domain/taskGroups';
 import { Badge } from '@/components/ui/Badge';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -50,13 +50,17 @@ export function PersonnelCard({ person, tasks, today, onOpenPerson, onOpenTask }
                   type="button"
                   onClick={() => onOpenTask(task.id)}
                   aria-haspopup="dialog"
-                  title={task.title}
+                  title={isBlocked(task) ? `${task.title}
+Blocked: ${task.blocker}` : task.title}
                   className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm hover:bg-line"
                 >
                   <TaskStatusIcon status={task.status} />
                   <span className={`min-w-0 flex-1 truncate ${task.status === 'done' ? 'text-muted line-through' : ''}`}>
                     {task.title}
                   </span>
+                  {isBlocked(task) && (
+                    <OctagonAlert role="img" aria-label="Blocked" className="size-3.5 shrink-0 text-danger" />
+                  )}
                   {due && (
                     <span className={`shrink-0 text-xs ${isOverdue(task, today) ? 'text-danger' : 'text-muted'}`}>
                       {formatDateKey(due)}
