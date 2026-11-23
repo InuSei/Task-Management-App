@@ -78,6 +78,21 @@
   --on-accent: var(--canvas);
 }
 
+/* Department (role) colours: same muted family as the accents, adjusted per theme the same way for AA text. */
+[data-role-color="clay"] { --role-base: #b5735a; }
+[data-role-color="slate"] { --role-base: #6c86a6; }
+[data-role-color="sage"] { --role-base: #7f9c80; }
+[data-role-color="ochre"] { --role-base: #b8944f; }
+[data-role-color="plum"] { --role-base: #95728d; }
+[data-role-color="teal"] { --role-base: #5f9893; }
+[data-role-color="rose"] { --role-base: #b56f7f; }
+[data-role-color="stone"] { --role-base: #8f877c; }
+
+[data-role-color] {
+  /* 12 points more --fg than the accent, because role text sits on its own tinted badge background. */
+  --role: color-mix(in oklab, var(--role-base) calc(var(--accent-depth) - 12%), var(--fg));
+}
+
 @theme inline {
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
@@ -90,6 +105,7 @@
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
+  --color-role: var(--role);
 }
 
 :focus-visible {

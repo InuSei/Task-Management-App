@@ -2,21 +2,25 @@
 
 import { useId } from 'react';
 import { departmentsOf, type Personnel, type PersonnelInput, type PersonnelPatch } from '@/domain/personnel';
+import type { DepartmentColors } from '@/domain/roleColor';
 import { PanelHeader } from '@/components/ui/PanelHeader';
 import { SlideOver } from '@/components/ui/SlideOver';
 import { PersonnelForm } from './PersonnelForm';
 import { PersonnelRow } from './PersonnelRow';
+import { RoleColorPicker } from './RoleColorPicker';
 
 interface TeamDialogProps {
   open: boolean;
   people: readonly Personnel[];
+  colors: DepartmentColors;
+  onColorsChange: (colors: DepartmentColors) => void;
   onClose: () => void;
   onAdd: (input: PersonnelInput) => void;
   onUpdate: (id: string, patch: PersonnelPatch) => void;
   onRemove: (id: string) => void;
 }
 
-export function TeamDialog({ open, people, onClose, onAdd, onUpdate, onRemove }: TeamDialogProps) {
+export function TeamDialog({ open, people, colors, onColorsChange, onClose, onAdd, onUpdate, onRemove }: TeamDialogProps) {
   const listId = useId();
 
   return (
@@ -45,6 +49,7 @@ export function TeamDialog({ open, people, onClose, onAdd, onUpdate, onRemove }:
               ))}
             </ul>
           )}
+          <RoleColorPicker departments={departmentsOf(people)} colors={colors} onChange={onColorsChange} />
         </div>
       )}
     </SlideOver>

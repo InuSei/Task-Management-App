@@ -1,8 +1,9 @@
+import { Users } from 'lucide-react';
 import type { Personnel } from '@/domain/personnel';
 import type { Task } from '@/domain/task';
 import { dueDateKey, formatDateKey } from '@/domain/taskGroups';
 import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
-import { PriorityBadge, UrgencyBadge } from './TaskBadges';
+import { BlockedBadge, PriorityBadge, UrgencyBadge } from './TaskBadges';
 
 interface TaskListItemProps {
   task: Task;
@@ -16,6 +17,7 @@ interface TaskListItemProps {
 export function TaskListItem({ task, today, people, onAssign, onToggleDone, onOpen }: TaskListItemProps) {
   const done = task.status === 'done';
   const due = dueDateKey(task.dueDate);
+  const collaborators = people.filter((p) => task.collaboratorIds?.includes(p.id) && p.id !== task.assigneeId);
 
   return (
     <li className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-surface">
@@ -33,6 +35,17 @@ export function TaskListItem({ task, today, people, onAssign, onToggleDone, onOp
       >
         {task.title}
       </button>
+      {collaborators.length > 0 && (
+        <span
+          title={`Collaborators: ${collaborators.map((p) => p.name).join(', ')}`}
+          className="flex shrink-0 items-center gap-0.5 text-xs text-muted"
+        >
+          <Users className="size-3.5" aria-hidden />
+          <span className="sr-only">Collaborators: </span>
+          {collaborators.length}
+        </span>
+      )}
+      <BlockedBadge task={task} />
       <UrgencyBadge task={task} today={today} />
       {due && <span className="shrink-0 text-xs text-muted">{formatDateKey(due)}</span>}
       <PriorityBadge task={task} />

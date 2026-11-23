@@ -1,17 +1,20 @@
-import { STATUS_LABELS, TASK_STATUSES, type Task, type TaskPatch } from '@/domain/task';
+import { OctagonAlert } from 'lucide-react';
+import { isBlocked, STATUS_LABELS, TASK_STATUSES, type Task, type TaskPatch } from '@/domain/task';
 import { dueDateKey, formatDateKey } from '@/domain/taskGroups';
+import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
-import { PriorityBadge, UrgencyBadge } from '@/components/tasks/TaskBadges';
+import { BlockedBadge, PriorityBadge, UrgencyBadge } from '@/components/tasks/TaskBadges';
 import { TaskStatusIcon } from './TaskStatusIcon';
 
 interface DetailTaskRowProps {
   task: Task;
   today: string;
+  collaborating: boolean;
   onUpdate: (id: string, patch: TaskPatch) => void;
   onOpen: (id: string) => void;
 }
 
-export function DetailTaskRow({ task, today, onUpdate, onOpen }: DetailTaskRowProps) {
+export function DetailTaskRow({ task, today, collaborating, onUpdate, onOpen }: DetailTaskRowProps) {
   const due = dueDateKey(task.dueDate);
 
   return (
@@ -29,6 +32,8 @@ export function DetailTaskRow({ task, today, onUpdate, onOpen }: DetailTaskRowPr
         >
           {task.title}
         </button>
+        {collaborating && <Badge>Collaborator</Badge>}
+        <BlockedBadge task={task} />
         <UrgencyBadge task={task} today={today} />
         <PriorityBadge task={task} />
       </div>
@@ -43,6 +48,15 @@ export function DetailTaskRow({ task, today, onUpdate, onOpen }: DetailTaskRowPr
         />
         <span>{due ? `Due ${formatDateKey(due, { weekday: 'short', month: 'short', day: 'numeric' })}` : 'No deadline'}</span>
       </div>
+      {isBlocked(task) && (
+        <p className="flex gap-2 rounded-md border border-danger/30 bg-danger/5 p-2 text-sm">
+          <OctagonAlert className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden />
+          <span className="whitespace-pre-wrap break-words">
+            <span className="font-medium text-danger">Blocker: </span>
+            {task.blocker}
+          </span>
+        </p>
+      )}
       {task.description && <p className="whitespace-pre-wrap break-words text-sm text-muted">{task.description}</p>}
     </li>
   );
