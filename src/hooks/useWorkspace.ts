@@ -8,9 +8,9 @@ import { useWeeks } from './useWeeks';
 
 /** Tasks, personnel and weeks, plus the rules that span them. */
 export function useWorkspace() {
-  const { tasks, loaded: tasksLoaded, addTask, updateTask: patchTask, deleteTask } = useTasks();
-  const { people, loaded: peopleLoaded, addPerson, updatePerson, removePerson } = usePersonnel();
-  const [weeks, setWeeks] = useWeeks();
+  const { tasks, loaded: tasksLoaded, failed: tasksFailed, addTask, updateTask: patchTask, deleteTask } = useTasks();
+  const { people, loaded: peopleLoaded, failed: peopleFailed, addPerson, updatePerson, removePerson } = usePersonnel();
+  const { weeks, setWeeks, failed: weeksFailed } = useWeeks();
 
   // Allocating a task with no week puts it in the active week (spec §8.2).
   function updateTask(id: string, patch: TaskPatch) {
@@ -38,6 +38,7 @@ export function useWorkspace() {
 
   return {
     loaded: tasksLoaded && peopleLoaded,
+    loadFailed: tasksFailed || peopleFailed || weeksFailed,
     tasks, addTask, updateTask, deleteTask,
     people, addPerson, updatePerson, removePerson: removePersonAndUnassign,
     weeks, setWeeks, renameActiveWeek,

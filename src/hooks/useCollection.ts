@@ -7,10 +7,17 @@ import type { Repository } from '@/repositories/repository';
 export function useCollection<T extends { id: string }>(repo: Repository<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const refresh = useCallback(async () => {
-    setItems(await repo.list());
-    setLoaded(true);
+    try {
+      setItems(await repo.list());
+      setLoaded(true);
+      setFailed(false);
+    } catch (error) {
+      console.error('[useCollection] Failed to load.', error);
+      setFailed(true);
+    }
   }, [repo]);
 
   useEffect(() => {
@@ -40,5 +47,5 @@ export function useCollection<T extends { id: string }>(repo: Repository<T>) {
     [run, repo],
   );
 
-  return { items, loaded, create, update, remove };
+  return { items, loaded, failed, create, update, remove };
 }

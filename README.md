@@ -1,6 +1,6 @@
 # Personal Task Manager
 
-A fast, local-first task manager. Capture tasks in seconds, assign them to people, track each person's weekly progress on a dashboard, watch deadlines on a Timeline, and theme it to taste. Dark mode is the default. Everything is stored in your browser, so there's no account, server or setup.
+A fast, local-first task manager. Capture tasks in seconds, assign them to people, track each person's weekly progress on a dashboard, watch deadlines on a Timeline, and theme it to taste. Data is shared through a MongoDB database, so everyone who opens the app sees the same team, tasks and progress. Theme and view choices stay per browser.
 
 ## Features
 
@@ -19,7 +19,7 @@ A fast, local-first task manager. Capture tasks in seconds, assign them to peopl
 - [Next.js](https://nextjs.org) (App Router) + TypeScript (strict mode)
 - [Tailwind CSS](https://tailwindcss.com) v4 + CSS custom properties for theming
 - [Lucide](https://lucide.dev) icons
-- Browser `localStorage` for persistence
+- [MongoDB](https://www.mongodb.com) (official `mongodb` driver) via Next.js route handlers for shared data; browser `localStorage` for personal preferences
 
 ## Getting started
 
@@ -31,6 +31,16 @@ npm run dev
 ```
 
 Then open <http://localhost:3000>.
+
+### Connecting the database
+
+1. Create a MongoDB database. The free tier of [MongoDB Atlas](https://www.mongodb.com/atlas) is enough. In Atlas, allow your server's IP under **Network Access**.
+2. Copy `.env.example` to `.env.local` and set `MONGODB_URI` to your connection string (Atlas: **Database > Connect > Drivers**). `.env.local` is git-ignored; never commit it or paste it anywhere public.
+3. Restart `npm run dev`.
+
+If the database can't be reached, the app shows a notice instead of the workspace. To try the app without a database, set `NEXT_PUBLIC_STORAGE=local` in `.env.local`; data then stays in that browser only.
+
+> **No sign-in yet.** Anyone who can open the app's URL can view and edit all data. Only deploy it where the URL is limited to your team (e.g. an internal network), or add authentication first.
 
 ### Scripts
 
@@ -65,31 +75,31 @@ src/
 │   └── ui/           # Reusable primitives (Badge, Select, Field, SlideOver, ProgressBar, …)
 ├── domain/           # Pure types and logic: tasks, personnel, weeks, dashboard, grouping, filters, timeline, theme
 ├── hooks/            # useWorkspace, useTasks, usePersonnel, useWeeks, useTheme, useViewMode
-└── repositories/     # Task/Personnel repository interfaces, localStorage implementations, preferences store
+├── repositories/     # Repository interfaces, API (shared) and localStorage implementations, preferences store
+└── server/           # MongoDB connection and validated route handlers used by src/app/api
 ```
 
 ## Architecture
 
 - **Domain logic is pure.** Grouping, urgency, filtering, ordering and timeline building live in `src/domain` with no React or browser dependencies, and `npm run check` tests them.
 - **UI never touches storage.** Components go through hooks, and hooks talk to the `TaskRepository` and `PersonnelRepository` interfaces (`src/repositories/`).
-- **Swapping storage is one line.** To use a different backend, implement `TaskRepository` / `PersonnelRepository` and change the instances in `src/repositories/provider.ts`. No UI changes are needed.
+- **Swapping storage is one place.** `src/repositories/provider.ts` picks the API repositories (shared MongoDB, the default) or the localStorage ones (`NEXT_PUBLIC_STORAGE=local`). No UI changes are needed.
+- **The server validates every write.** `/api/tasks`, `/api/personnel` and `/api/weeks` check each request body with the same domain guards the client uses, and return `400` for invalid data. Database errors return a generic `500`; details go to the server log only.
 - **Theme colours live in CSS.** `<html data-mode data-accent>` selects the CSS variables (`--accent-primary`, `--accent-hover`, …). A small inline script sets these attributes before the page paints.
 
 ## Data and privacy
 
-All data stays in your browser's `localStorage` under these keys:
+Shared data lives in your MongoDB database (`MONGODB_DB`, default `task-manager`):
 
-| Key          | Contents                    |
-| ------------ | --------------------------- |
-| `ptm:tasks`  | Your tasks                  |
-| `ptm:personnel` | Your team members        |
-| `ptm:weeks`  | Week labels and active week |
-| `ptm:theme`  | Colour mode and accent      |
-| `ptm:view`   | Last-selected view          |
+| Collection  | Contents                                  |
+| ----------- | ----------------------------------------- |
+| `tasks`     | All tasks                                 |
+| `personnel` | Team members                              |
+| `settings`  | The week list and active week (`weeks`)   |
 
-If task or personnel data ever becomes unreadable, the app starts with an empty list instead of crashing. It saves the unreadable data under `<key>:corrupt-backup` so it can be recovered by hand.
+Personal preferences stay in each browser's `localStorage`: `ptm:theme` (theme and accent) and `ptm:view` (last-selected view). With `NEXT_PUBLIC_STORAGE=local`, tasks, people and weeks are also kept there (`ptm:tasks`, `ptm:personnel`, `ptm:weeks`).
 
-Clearing your browser's site data deletes your tasks. Data doesn't sync between browsers or devices.
+Changes made by others appear when you reload the page. If two people edit the same task at the same moment, the last save wins.
 
 ## Browser support
 
@@ -102,7 +112,7 @@ Recent versions of Chrome, Edge, Firefox and Safari. The app relies on native `<
 - [x] Kanban board, filtering, theme customizer
 - [x] Timeline monitor
 - [x] Personnel allocation and progress dashboard (replaces the Kanban board)
-- [ ] Optional MongoDB backend (`/api/tasks` + `MongoTaskRepository`)
+- [x] Shared MongoDB backend (`/api/tasks`, `/api/personnel`, `/api/weeks`)
 
 ## License
 
