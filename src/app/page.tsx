@@ -33,7 +33,13 @@ export default function WorkspacePage() {
       <Header view={view} onViewChange={setView} onManageTeam={openTeam} />
       <QuickAddBar people={ws.people} weeks={ws.weeks} onAdd={ws.addTask} />
       <FilterBar filters={filters} onChange={setFilters} />
-      {ws.loaded && (
+      {ws.loadFailed && (
+        <p role="alert" className="m-4 rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm text-danger">
+          Couldn&apos;t reach the shared database, so changes may not be saved. Check the server&apos;s MongoDB
+          settings, then reload the page.
+        </p>
+      )}
+      {ws.loaded && !ws.loadFailed && (
         <div className="space-y-4 p-4">
           {view === 'dashboard' ? (
             <PersonnelDashboard

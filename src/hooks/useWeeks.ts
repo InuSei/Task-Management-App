@@ -2,18 +2,38 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_WEEKS, type WeekContext } from '@/domain/week';
-import { loadWeeks, saveWeeks } from '@/repositories/preferencesStore';
+import { weekRepository } from '@/repositories/provider';
+import type { WeekRepository } from '@/repositories/weekRepository';
 
-/** Week labels and the active week, persisted across visits. */
-export function useWeeks() {
+/** Shared week labels and the active week; saves optimistically and reloads if a save fails. */
+export function useWeeks(repo: WeekRepository = weekRepository) {
   const [weeks, setWeeksState] = useState<WeekContext>(DEFAULT_WEEKS);
+  const [failed, setFailed] = useState(false);
 
-  useEffect(() => setWeeksState(loadWeeks()), []);
+  const refresh = useCallback(async () => {
+    try {
+      setWeeksState(await repo.load());
+      setFailed(false);
+    } catch (error) {
+      console.error('[useWeeks] Failed to load weeks.', error);
+      setFailed(true);
+    }
+  }, [repo]);
 
-  const setWeeks = useCallback((next: WeekContext) => {
-    saveWeeks(next);
-    setWeeksState(next);
-  }, []);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
-  return [weeks, setWeeks] as const;
+  const setWeeks = useCallback(
+    (next: WeekContext) => {
+      setWeeksState(next);
+      repo.save(next).catch((error: unknown) => {
+        console.error('[useWeeks] Failed to save weeks; reloading.', error);
+        void refresh();
+      });
+    },
+    [repo, refresh],
+  );
+
+  return { weeks, setWeeks, failed };
 }

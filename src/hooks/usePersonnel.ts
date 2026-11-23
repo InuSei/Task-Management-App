@@ -7,7 +7,7 @@ import { personnelRepository } from '@/repositories/provider';
 import { useCollection } from './useCollection';
 
 export function usePersonnel(repo: PersonnelRepository = personnelRepository) {
-  const { items: people, loaded, create, update, remove } = useCollection(repo);
+  const { items: people, loaded, failed, create, update, remove } = useCollection(repo);
 
   const addPerson = useCallback((input: PersonnelInput) => create(createPersonnel(input)), [create]);
 
@@ -19,5 +19,5 @@ export function usePersonnel(repo: PersonnelRepository = personnelRepository) {
     [people, update],
   );
 
-  return { people, loaded, addPerson, updatePerson, removePerson: remove };
+  return { people, loaded, failed, addPerson, updatePerson, removePerson: remove };
 }

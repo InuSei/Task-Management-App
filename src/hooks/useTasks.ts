@@ -9,7 +9,7 @@ import { useCollection } from './useCollection';
 const nextOrder = (tasks: readonly Task[]) => tasks.reduce((max, t) => Math.max(max, t.order), 0) + 1;
 
 export function useTasks(repo: TaskRepository = taskRepository) {
-  const { items: tasks, loaded, create, update, remove } = useCollection(repo);
+  const { items: tasks, loaded, failed, create, update, remove } = useCollection(repo);
 
   const addTask = useCallback(
     (input: NewTaskInput) => create(createTask(input, nextOrder(tasks))),
@@ -24,5 +24,5 @@ export function useTasks(repo: TaskRepository = taskRepository) {
     [tasks, update],
   );
 
-  return { tasks, loaded, addTask, updateTask, deleteTask: remove };
+  return { tasks, loaded, failed, addTask, updateTask, deleteTask: remove };
 }
