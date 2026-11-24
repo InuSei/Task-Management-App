@@ -12,10 +12,7 @@ interface HeaderProps {
 export function Header({ view, onViewChange, onManageTeam }: HeaderProps) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-      <h1 className="flex items-center gap-2 text-lg font-semibold">
-        <img src="/icon.svg" alt="" className="size-6" />
-        Teampad
-      </h1>
+      <h1 className="text-lg font-semibold">Teampad</h1>
       <div className="flex items-center gap-2">
         <ViewSwitcher view={view} onChange={onViewChange} />
         <button
