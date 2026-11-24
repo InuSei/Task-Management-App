@@ -5,7 +5,7 @@ import { ListView } from './ListView';
 import { TimelineMonitor } from './TimelineMonitor';
 
 interface WorkspaceViewProps {
-  view: Exclude<ViewMode, 'dashboard'>;
+  view: Exclude<ViewMode, 'dashboard' | 'report'>;
   totalCount: number;
   tasks: readonly Task[];
   people: readonly Personnel[];
