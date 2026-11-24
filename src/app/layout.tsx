@@ -5,8 +5,8 @@ import { themeInitScript } from './themeScript';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Tasks',
-  description: 'Personal task manager',
+  title: 'Teampad',
+  description: 'Team task board',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
