@@ -15,6 +15,7 @@ import { AssigneeSelect } from '@/components/personnel/AssigneeSelect';
 import { WeekSelect } from '@/components/personnel/WeekSelect';
 import { BlockerField } from './BlockerField';
 import { CollaboratorPicker } from './CollaboratorPicker';
+import { SubtaskList } from './SubtaskList';
 
 interface TaskEditFormProps {
   task: Task;
@@ -76,6 +77,7 @@ export function TaskEditForm({ task, people, weeks, onUpdate, onDelete, onClose 
           className={`${inputClass} resize-y`}
         />
       </Field>
+      <SubtaskList subtasks={task.subtasks} onChange={(subtasks) => onUpdate({ subtasks })} />
       <BlockerField blocker={task.blocker} onSave={(blocker) => onUpdate({ blocker })} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Status">

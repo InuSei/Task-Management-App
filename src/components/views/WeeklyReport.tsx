@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Users } from 'lucide-react';
+import { Check, Download, Square, Users } from 'lucide-react';
 import { isCollaborator } from '@/domain/dashboard';
 import type { Personnel } from '@/domain/personnel';
 import { buildWeeklyReport, NO_DEPARTMENT, REPORT_SECTIONS } from '@/domain/report';
 import type { DepartmentColors } from '@/domain/roleColor';
-import type { Task } from '@/domain/task';
+import { subtaskCount, type Task } from '@/domain/task';
 import { dueDateKey, formatDateKey, isOverdue, toDateKey } from '@/domain/taskGroups';
 import type { WeekContext } from '@/domain/week';
 import { TaskStatusIcon } from '@/components/dashboard/TaskStatusIcon';
@@ -139,11 +139,15 @@ function Stat({ label, value, danger = false }: { label: string; value: string |
 function ReportTaskRow({ task, today, collaborating }: { task: Task; today: string; collaborating: boolean }) {
   const due = dueDateKey(task.dueDate);
   const overdue = isOverdue(task, today);
+  const count = subtaskCount(task);
   return (
     <li className="py-1 text-sm">
       <div className="flex items-center gap-2">
         <TaskStatusIcon status={task.status} />
-        <span className="min-w-0 flex-1 break-words">{task.title}</span>
+        <span className="min-w-0 flex-1 break-words">
+          {task.title}
+          {count && <span className="ml-1.5 text-xs text-muted">({count})</span>}
+        </span>
         {collaborating && <Users role="img" aria-label="Collaborating" className="size-3.5 shrink-0 text-muted" />}
         {due && (
           <span className={`shrink-0 text-xs ${overdue ? 'font-medium text-danger' : 'text-muted'}`}>
@@ -154,6 +158,20 @@ function ReportTaskRow({ task, today, collaborating }: { task: Task; today: stri
       </div>
       {task.status !== 'done' && task.blocker?.trim() && (
         <p className="ml-6 text-xs whitespace-pre-line text-danger">Blocker: {task.blocker}</p>
+      )}
+      {task.subtasks && task.subtasks.length > 0 && (
+        <ul className="ml-6 text-xs">
+          {task.subtasks.map((s) => (
+            <li key={s.id} className="flex items-center gap-1.5">
+              {s.done ? (
+                <Check role="img" aria-label="Done" className="size-3 shrink-0 text-success" />
+              ) : (
+                <Square role="img" aria-label="Not done" className="size-3 shrink-0 text-muted" />
+              )}
+              <span className={s.done ? 'text-muted line-through' : ''}>{s.title}</span>
+            </li>
+          ))}
+        </ul>
       )}
     </li>
   );

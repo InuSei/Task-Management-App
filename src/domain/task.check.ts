@@ -1,6 +1,6 @@
 // Self-check for domain logic. Run: npm run check
 import assert from 'node:assert/strict';
-import { applyPatch, createTask, isBlocked, isTask, isValidTitle } from './task.ts';
+import { applyPatch, createTask, isBlocked, isTask, isValidTitle, newSubtask, subtaskCount } from './task.ts';
 import { addDays, dueDateKey, getUrgency, groupTasks } from './taskGroups.ts';
 import { buildTimeline } from './timeline.ts';
 import { filterTasks } from './taskFilters.ts';
@@ -72,3 +72,19 @@ assert.deepEqual(timeline.days[6]?.tasks, [upcoming]); // 2026-11-25
 assert.equal(timeline.days.flatMap((d) => d.tasks).length, 2);
 
 console.log('domain checks passed');
+
+// Sub-tasks: optional, validated, counted
+{
+  const parent = make('parent', null);
+  assert.equal(subtaskCount(parent), null);
+  assert.throws(() => newSubtask('  '));
+  const a = newSubtask('  first  ');
+  assert.equal(a.title, 'first');
+  const withSubs = applyPatch(parent, { subtasks: [{ ...a, done: true }, newSubtask('second')] });
+  assert.equal(subtaskCount(withSubs), '1/2');
+  assert.equal(isTask(withSubs), true);
+  assert.equal(isTask({ ...withSubs, subtasks: [{ id: 'x', title: '', done: false }] }), false);
+  assert.equal(isTask({ ...withSubs, subtasks: [{ id: 'x', title: 'ok', done: 'yes' }] }), false);
+  assert.equal(isTask({ ...withSubs, subtasks: 'nope' }), false);
+  console.log('subtask checks passed');
+}

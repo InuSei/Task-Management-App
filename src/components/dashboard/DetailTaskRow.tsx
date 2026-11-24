@@ -1,5 +1,5 @@
 import { OctagonAlert } from 'lucide-react';
-import { isBlocked, STATUS_LABELS, TASK_STATUSES, type Task, type TaskPatch } from '@/domain/task';
+import { isBlocked, STATUS_LABELS, subtaskCount, TASK_STATUSES, type Task, type TaskPatch } from '@/domain/task';
 import { dueDateKey, formatDateKey } from '@/domain/taskGroups';
 import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
@@ -16,6 +16,7 @@ interface DetailTaskRowProps {
 
 export function DetailTaskRow({ task, today, collaborating, onUpdate, onOpen }: DetailTaskRowProps) {
   const due = dueDateKey(task.dueDate);
+  const count = subtaskCount(task);
 
   return (
     <li className="space-y-2 py-3">
@@ -32,6 +33,7 @@ export function DetailTaskRow({ task, today, collaborating, onUpdate, onOpen }: 
         >
           {task.title}
         </button>
+        {count && <Badge>{count}</Badge>}
         {collaborating && <Badge>Collaborator</Badge>}
         <BlockedBadge task={task} />
         <UrgencyBadge task={task} today={today} />
@@ -48,6 +50,25 @@ export function DetailTaskRow({ task, today, collaborating, onUpdate, onOpen }: 
         />
         <span>{due ? `Due ${formatDateKey(due, { weekday: 'short', month: 'short', day: 'numeric' })}` : 'No deadline'}</span>
       </div>
+      {task.subtasks && task.subtasks.length > 0 && (
+        <ul className="ml-6 space-y-0.5">
+          {task.subtasks.map((s) => (
+            <li key={s.id}>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={s.done}
+                  onChange={() =>
+                    onUpdate(task.id, { subtasks: task.subtasks?.map((x) => (x.id === s.id ? { ...x, done: !x.done } : x)) })
+                  }
+                  className="size-4 shrink-0 accent-accent"
+                />
+                <span className={`break-words ${s.done ? 'text-muted line-through' : ''}`}>{s.title}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
       {isBlocked(task) && (
         <p className="flex gap-2 rounded-md border border-danger/30 bg-danger/5 p-2 text-sm">
           <OctagonAlert className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden />

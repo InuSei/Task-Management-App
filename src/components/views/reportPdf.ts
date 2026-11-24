@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { autoTable, type RowInput } from 'jspdf-autotable';
 import { REPORT_SECTIONS, sectionOf, type WeeklyReport } from '@/domain/report';
-import type { Task } from '@/domain/task';
+import { subtaskCount, type Task } from '@/domain/task';
 import { dueDateKey, formatDateKey, isOverdue } from '@/domain/taskGroups';
 
 const SECTION_LABELS = Object.fromEntries(REPORT_SECTIONS.map((s) => [s.id, s.label]));
@@ -11,9 +11,12 @@ function taskRow(task: Task, label: string, today: string): RowInput {
   const due = dueDateKey(task.dueDate);
   const overdue = isOverdue(task, today);
   const blocker = task.status !== 'done' ? (task.blocker?.trim() ?? '') : '';
+  const count = subtaskCount(task);
+  // Helvetica has no checkbox glyphs, so sub-tasks use [x] / [ ].
+  const subtasks = (task.subtasks ?? []).map((s) => `\n   ${s.done ? '[x]' : '[ ]'} ${s.title}`).join('');
   return [
     label,
-    task.title,
+    `${task.title}${count ? ` (${count})` : ''}${subtasks}`,
     { content: due ? `${overdue ? 'Overdue ' : ''}${formatDateKey(due)}` : '', styles: overdue ? { textColor: DANGER } : {} },
     { content: blocker, styles: { textColor: DANGER } },
   ];
