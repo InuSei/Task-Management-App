@@ -1,6 +1,6 @@
-export type ViewMode = 'list' | 'dashboard' | 'timeline';
+export type ViewMode = 'list' | 'dashboard' | 'timeline' | 'report';
 
-export const VIEW_MODES: readonly ViewMode[] = ['list', 'dashboard', 'timeline'];
+export const VIEW_MODES: readonly ViewMode[] = ['list', 'dashboard', 'timeline', 'report'];
 export const DEFAULT_VIEW: ViewMode = 'list';
 export const VIEW_STORAGE_KEY = 'ptm:view';
 

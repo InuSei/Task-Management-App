@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { applyPatch, createTask, isTask } from './task.ts';
 import { applyPersonnelPatch, createPersonnel, departmentsOf, isPersonnel, isValidName } from './personnel.ts';
-import { addWeek, DEFAULT_WEEKS, isWeekContext, renameWeek } from './week.ts';
+import { addWeek, DEFAULT_WEEKS, isWeekContext, removeWeek, renameWeek } from './week.ts';
 import { isCollaborator, progressPercent, tasksForPerson } from './dashboard.ts';
 import { DEFAULT_DEPARTMENT_COLORS, isDepartmentColors, roleColorOf, ROLE_COLORS, setRoleColor } from './roleColor.ts';
 
@@ -57,6 +57,13 @@ assert.equal(renameWeek(two, 'Week 2', 'Week 1'), null); // duplicate
 assert.equal(renameWeek(two, 'Week 2', '  '), null); // empty
 assert.deepEqual(renameWeek(two, 'Week 2', 'Week 2'), two); // unchanged is fine
 assert.equal(isWeekContext(two), true);
+const three = { activeWeekLabel: 'Week 2', availableWeeks: ['Week 1', 'Week 2', 'Week 3'] };
+assert.deepEqual(removeWeek(three, 'Week 2'), { activeWeekLabel: 'Week 1', availableWeeks: ['Week 1', 'Week 3'] }); // active → previous
+assert.deepEqual(removeWeek({ ...three, activeWeekLabel: 'Week 1' }, 'Week 1'), { activeWeekLabel: 'Week 2', availableWeeks: ['Week 2', 'Week 3'] }); // first → new first
+assert.deepEqual(removeWeek(three, 'Week 3'), { activeWeekLabel: 'Week 2', availableWeeks: ['Week 1', 'Week 2'] }); // other week keeps selection
+assert.equal(removeWeek(DEFAULT_WEEKS, 'Week 1'), null); // never the last week
+assert.equal(removeWeek(three, 'Week 9'), null);
+assert.equal(isWeekContext(removeWeek(three, 'Week 2')), true);
 assert.equal(isWeekContext({ activeWeekLabel: 'Week 9', availableWeeks: ['Week 1'] }), false);
 
 // Collaborators: the task shows for them too, flagged as collaborating; the owner isn't a collaborator

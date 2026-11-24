@@ -9,10 +9,12 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "check": "node src/domain/task.check.ts && node src/domain/personnel.check.ts"
+    "check": "node src/domain/task.check.ts && node src/domain/personnel.check.ts && node src/domain/report.check.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lucide-react": "^1.76.0",
     "mongodb": "^7.9.1",
     "next": "^16.4.6",

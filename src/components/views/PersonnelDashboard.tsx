@@ -19,6 +19,7 @@ interface PersonnelDashboardProps {
   departmentColors: DepartmentColors;
   onWeeksChange: (weeks: WeekContext) => void;
   onRenameWeek: (label: string) => boolean;
+  activeWeekTaskCount: number;
   onUpdate: (id: string, patch: TaskPatch) => void;
   onOpenTask: (id: string) => void;
   onManageTeam: () => void;

@@ -11,6 +11,7 @@ import { FilterBar } from '@/components/tasks/FilterBar';
 import { QuickAddBar } from '@/components/tasks/QuickAddBar';
 import { TaskDrawer } from '@/components/tasks/TaskDrawer';
 import { PersonnelDashboard } from '@/components/views/PersonnelDashboard';
+import { WeeklyReport } from '@/components/views/WeeklyReport';
 import { WorkspaceView } from '@/components/views/WorkspaceView';
 
 export default function WorkspacePage() {
@@ -31,8 +32,13 @@ export default function WorkspacePage() {
   return (
     <main className="mx-auto min-h-dvh max-w-5xl">
       <Header view={view} onViewChange={setView} onManageTeam={openTeam} />
-      <QuickAddBar people={ws.people} weeks={ws.weeks} onAdd={ws.addTask} />
-      <FilterBar filters={filters} onChange={setFilters} />
+      {/* The report always covers every task in the week, so filters would only mislead there. */}
+      {view !== 'report' && (
+        <>
+          <QuickAddBar people={ws.people} weeks={ws.weeks} onAdd={ws.addTask} />
+          <FilterBar filters={filters} onChange={setFilters} />
+        </>
+      )}
       {ws.loadFailed && (
         <p role="alert" className="m-4 rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm text-danger">
           Couldn&apos;t reach the shared database, so changes may not be saved. Check the server&apos;s MongoDB
@@ -41,7 +47,9 @@ export default function WorkspacePage() {
       )}
       {ws.loaded && !ws.loadFailed && (
         <div className="space-y-4 p-4">
-          {view === 'dashboard' ? (
+          {view === 'report' ? (
+            <WeeklyReport people={ws.people} tasks={ws.tasks} weeks={ws.weeks} departmentColors={ws.departmentColors} />
+          ) : view === 'dashboard' ? (
             <PersonnelDashboard
               people={ws.people}
               tasks={visible}
@@ -49,6 +57,7 @@ export default function WorkspacePage() {
               departmentColors={ws.departmentColors}
               onWeeksChange={ws.setWeeks}
               onRenameWeek={ws.renameActiveWeek}
+              activeWeekTaskCount={ws.tasks.filter((t) => t.weekLabel === ws.weeks.activeWeekLabel).length}
               onUpdate={ws.updateTask}
               onOpenTask={setSelectedId}
               onManageTeam={openTeam}
