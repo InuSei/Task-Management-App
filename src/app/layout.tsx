@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 import type { ReactNode } from 'react';
 import { DEFAULT_THEME } from '@/domain/theme';
 import { themeInitScript } from './themeScript';
@@ -21,7 +22,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="bg-canvas text-fg antialiased">{children}</body>
+      <body className="bg-canvas text-fg antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
