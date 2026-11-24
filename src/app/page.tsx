@@ -57,6 +57,7 @@ export default function WorkspacePage() {
               departmentColors={ws.departmentColors}
               onWeeksChange={ws.setWeeks}
               onRenameWeek={ws.renameActiveWeek}
+              activeWeekTaskCount={ws.tasks.filter((t) => t.weekLabel === ws.weeks.activeWeekLabel).length}
               onUpdate={ws.updateTask}
               onOpenTask={setSelectedId}
               onManageTeam={openTeam}

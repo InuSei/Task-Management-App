@@ -26,6 +26,17 @@ export function renameWeek(ctx: WeekContext, from: string, to: string): WeekCont
   };
 }
 
+/** Context without the week, or null when it's the last one or unknown. Callers must check it has no tasks. */
+export function removeWeek(ctx: WeekContext, label: string): WeekContext | null {
+  const index = ctx.availableWeeks.indexOf(label);
+  if (index === -1 || ctx.availableWeeks.length === 1) return null;
+  const availableWeeks = ctx.availableWeeks.filter((w) => w !== label);
+  // Deleting the selected week selects its neighbour (the one before, or the new first).
+  const activeWeekLabel =
+    ctx.activeWeekLabel === label ? availableWeeks[Math.max(0, index - 1)]! : ctx.activeWeekLabel;
+  return { activeWeekLabel, availableWeeks };
+}
+
 export function isWeekContext(value: unknown): value is WeekContext {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
